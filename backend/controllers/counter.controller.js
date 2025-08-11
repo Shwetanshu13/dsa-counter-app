@@ -1,7 +1,8 @@
 import db from '../db/index.js'
 import { dailyCountRecord, dsaCounter } from '../db/schema.js'
+import { eq } from 'drizzle-orm'
 
-export const incrementDailyCounter = (req, res) => {
+export const incrementDailyCounter = async (req, res) => {
     try {
         const { userId } = req.body;
 
@@ -10,8 +11,9 @@ export const incrementDailyCounter = (req, res) => {
             return;
         }
 
-        db.update(dsaCounter).set({ count: dsaCounter.count + 1 }).where(eq(dsaCounter.userId, userId));
+        await db.update(dsaCounter).set({ count: dsaCounter.count + 1 }).where(eq(dsaCounter.userId, userId));
 
+        res.status(200).json({ message: 'Counter incremented successfully' });
     } catch (error) {
         console.error('Error incrementing counter:', error);
         res.status(500).json({ message: 'Internal server error' });

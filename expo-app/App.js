@@ -1,46 +1,43 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { useEffect, useState } from 'react';
-import { config } from './conf';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as SplashScreenLib from 'expo-splash-screen';
+import 'react-native-gesture-handler';
 
+import MainNavigator from './navigation/MainNavigator';
+import SplashScreen from './components/SplashScreen';
+import useAuthStore from './store/authStore';
+
+// Prevent the splash screen from auto-hiding
+SplashScreenLib.preventAutoHideAsync();
 
 export default function App() {
-  const [counter, setCounter] = useState(0);
-
-  const currentCounter = async () => {
-    const counterResponse = await fetch(`${config.apiUrl}/counter`);
-    const counterData = await counterResponse.json();
-    setCounter(counterData.value);
-    console.log('Current Counter:', counterData);
-  }
-  const incrementCounter = async () => {
-    const incrementResponse = await fetch(`${config.apiUrl}/increment`, {
-      method: 'POST',
-    });
-    const incrementData = await incrementResponse.json();
-    setCounter(incrementData.value);
-    console.log('Incremented Counter:', incrementData);
-  }
+  const [appIsReady, setAppIsReady] = useState(false);
+  const { initializeAuth, isLoading } = useAuthStore();
 
   useEffect(() => {
-    currentCounter();
+    async function prepare() {
+      try {
+        // Initialize auth state from secure storage
+        await initializeAuth();
+      } catch (e) {
+        console.warn('Error initializing app:', e);
+      } finally {
+        setAppIsReady(true);
+        // Hide the splash screen
+        SplashScreenLib.hideAsync();
+      }
+    }
+
+    prepare();
   }, []);
 
+  if (!appIsReady || isLoading) {
+    return <SplashScreen />;
+  }
 
   return (
-    <View style={styles.container}>
-      <Text>Counter: {counter}</Text>
-      <TouchableOpacity onPress={incrementCounter}>
-        <Text>Increment Counter</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaProvider>
+      <MainNavigator />
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

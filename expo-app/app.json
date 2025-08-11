@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "dsa-counter",
+    "name": "DSA Counter",
     "slug": "dsa-counter",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,18 +12,40 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dsacounter.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.dsacounter.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/splash-icon.png",
+          "dark": {
+            "backgroundColor": "#ffffff",
+            "image": "./assets/splash-icon.png"
+          },
+          "imageWidth": 200
+        }
+      ]
+    ]
   }
 }

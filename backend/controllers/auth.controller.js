@@ -1,6 +1,6 @@
 import db from "../db/index.js";
 import bcrypt from "bcrypt";
-import { dsaUsers } from "../db/schema.js";
+import { dsaUsers, dsaCounter } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 
 
@@ -16,7 +16,7 @@ const registerNewUser = async (req, res) => {
         }
 
         // Check if user already exists
-        const existingUsers = await db.select().from(dsaUsers).where(eq('email', email));
+        const existingUsers = await db.select().from(dsaUsers).where(eq(dsaUsers.email, email));
         if (existingUsers.length > 0) {
             res.status(409).json({ message: 'User already exists' });
             return;
@@ -26,10 +26,18 @@ const registerNewUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create new user
-        await db.insert(dsaUsers).values({
+        const newUsers = await db.insert(dsaUsers).values({
             name,
             email,
             password: hashedPassword
+        }).returning();
+
+        const newUser = newUsers[0];
+
+        // Create counter record for the new user
+        await db.insert(dsaCounter).values({
+            userId: newUser.id,
+            count: 0
         });
 
         res.status(201).json({ message: 'User registered successfully' });
