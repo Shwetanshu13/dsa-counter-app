@@ -11,9 +11,18 @@ export const incrementDailyCounter = async (req, res) => {
             return;
         }
 
-        await db.update(dsaCounter).set({ count: dsaCounter.count + 1 }).where(eq(dsaCounter.userId, userId));
+        // Fetch current count
+        const counterArr = await db.select().from(dsaCounter).where(eq(dsaCounter.userId, userId));
+        if (!counterArr || counterArr.length === 0) {
+            res.status(404).json({ message: 'Counter not found' });
+            return;
+        }
+        const currentCount = counterArr[0].count;
+        const newCount = currentCount + 1;
 
-        res.status(200).json({ message: 'Counter incremented successfully' });
+        await db.update(dsaCounter).set({ count: newCount }).where(eq(dsaCounter.userId, userId));
+
+        res.status(200).json({ message: 'Counter incremented successfully', count: newCount });
     } catch (error) {
         console.error('Error incrementing counter:', error);
         res.status(500).json({ message: 'Internal server error' });
